@@ -1,7 +1,7 @@
 // Configuration
 const CONFIG = {
-  localApiUrl: 'http://localhost:7071/api/ConvertToEpub',
-  productionApiUrl: 'https://YOUR_FUNCTION_APP.azurewebsites.net/api/ConvertToEpub',
+  localApiUrl: 'http://localhost:7071/api/convert-local',
+  productionApiUrl: 'https://YOUR_FUNCTION_APP.azurewebsites.net/api/convert',
   websiteUrl: 'http://localhost:4321', // Change to production URL when deployed
   productionWebsiteUrl: 'https://YOUR_STATIC_WEB_APP.azurestaticapps.net'
 };
@@ -85,6 +85,10 @@ async function loadPageContent() {
       if (response.success) {
         currentPageData = response.data;
         titleInput.value = currentPageData.title;
+        // Auto-fill author if available from metadata
+        if (currentPageData.author) {
+          authorInput.value = currentPageData.author;
+        }
         showContentSection();
       } else {
         showError('Failed to extract page content');

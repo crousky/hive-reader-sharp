@@ -9,7 +9,14 @@ using System.Text.Json;
 namespace SendToKindle.Functions;
 
 /// <summary>
-/// Production function - sends EPUB to Kindle email (requires function key authentication)
+/// Production function - sends EPUB to Kindle email (requires function key authentication).
+///
+/// This function receives HTML content that has already been scraped by the browser extension
+/// in the user's browser context. This means:
+/// - Paywalled content is accessible (user is already logged in)
+/// - VPN/geo-restrictions are bypassed (content is already loaded)
+/// - JavaScript-rendered content is captured (scraped after page load)
+/// - No need to fetch the URL - we already have the rendered HTML
 /// </summary>
 public class ConvertToEpub
 {
