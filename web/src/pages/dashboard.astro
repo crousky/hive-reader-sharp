@@ -1,0 +1,205 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { getCurrentUser } from '../lib/auth';
+
+const user = await getCurrentUser(Astro.cookies);
+
+if (!user) {
+  return Astro.redirect('/api/auth/login');
+}
+---
+
+<Layout title="Dashboard - Send to Kindle">
+  <div slot="nav">
+    <span>Welcome, {user.name}</span>
+    <form action="/api/auth/logout" method="POST" style="display: inline;">
+      <button type="submit" class="btn btn-secondary">Sign Out</button>
+    </form>
+  </div>
+
+  <div class="dashboard">
+    <div class="container">
+      <h1>Dashboard</h1>
+
+      <div class="card">
+        <h2>Kindle Settings</h2>
+        <p class="info-text">
+          Configure your Kindle email address to receive articles directly on your device.
+        </p>
+
+        <form id="kindle-form">
+          <div class="form-group">
+            <label for="kindle-email">Kindle Email Address</label>
+            <input
+              type="email"
+              id="kindle-email"
+              name="kindleEmail"
+              class="input"
+              placeholder="your-kindle@kindle.com"
+              value={user.kindleEmail || ''}
+              required
+            />
+            <small>Find your Kindle email in your Amazon account settings</small>
+          </div>
+
+          <div id="status-message" class="hidden"></div>
+
+          <button type="submit" class="btn btn-primary">Save Settings</button>
+        </form>
+      </div>
+
+      <div class="card">
+        <h2>Browser Extension</h2>
+        <p class="info-text">
+          Install the Send to Kindle extension for Chrome or Edge to send articles with one click.
+        </p>
+
+        <div class="extension-info">
+          <h3>Installation Steps:</h3>
+          <ol>
+            <li>Download the extension from the <code>extension</code> folder</li>
+            <li>Open Chrome/Edge and go to <code>chrome://extensions</code></li>
+            <li>Enable "Developer mode" in the top right</li>
+            <li>Click "Load unpacked" and select the extension folder</li>
+            <li>The extension is now ready to use!</li>
+          </ol>
+
+          <h3 style="margin-top: 1.5rem;">Using the Extension:</h3>
+          <ol>
+            <li>Navigate to any article you want to read on your Kindle</li>
+            <li>Click the Send to Kindle extension icon</li>
+            <li>Edit the title if needed</li>
+            <li>Click "Send to Kindle"</li>
+            <li>The article will be sent to your Kindle email!</li>
+          </ol>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Function Key (For Extension)</h2>
+        <p class="info-text">
+          The extension needs this function key to communicate with the Azure Functions backend.
+        </p>
+
+        <div class="form-group">
+          <label>Function Key</label>
+          <code class="function-key">YOUR_AZURE_FUNCTION_KEY_HERE</code>
+          <small>Configure this in the extension settings (right-click extension icon → Options)</small>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const form = document.getElementById('kindle-form') as HTMLFormElement;
+    const statusMessage = document.getElementById('status-message') as HTMLDivElement;
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const formData = new FormData(form);
+      const kindleEmail = formData.get('kindleEmail') as string;
+
+      try {
+        const response = await fetch('/api/user/update-kindle', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ kindleEmail })
+        });
+
+        if (response.ok) {
+          showMessage('Kindle email updated successfully!', 'success');
+        } else {
+          showMessage('Failed to update Kindle email', 'error');
+        }
+      } catch (error) {
+        showMessage('An error occurred. Please try again.', 'error');
+      }
+    });
+
+    function showMessage(message: string, type: 'success' | 'error') {
+      statusMessage.textContent = message;
+      statusMessage.className = `alert alert-${type}`;
+      statusMessage.classList.remove('hidden');
+
+      setTimeout(() => {
+        statusMessage.classList.add('hidden');
+      }, 5000);
+    }
+  </script>
+</Layout>
+
+<style>
+  .dashboard {
+    padding: 2rem 0;
+  }
+
+  h1 {
+    color: white;
+    margin-bottom: 2rem;
+    font-size: 2.5rem;
+  }
+
+  h2 {
+    margin-bottom: 1rem;
+    color: #667eea;
+  }
+
+  .card {
+    margin-bottom: 2rem;
+  }
+
+  .info-text {
+    color: #666;
+    margin-bottom: 1.5rem;
+    line-height: 1.6;
+  }
+
+  small {
+    display: block;
+    margin-top: 0.5rem;
+    color: #888;
+    font-size: 0.875rem;
+  }
+
+  .hidden {
+    display: none;
+  }
+
+  .extension-info {
+    background: #f5f5f5;
+    padding: 1.5rem;
+    border-radius: 8px;
+  }
+
+  .extension-info h3 {
+    margin-bottom: 0.75rem;
+    color: #555;
+  }
+
+  .extension-info ol {
+    margin-left: 1.5rem;
+    line-height: 1.8;
+    color: #666;
+  }
+
+  .extension-info code {
+    background: white;
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    font-family: 'Courier New', monospace;
+    font-size: 0.9rem;
+  }
+
+  .function-key {
+    display: block;
+    background: #f5f5f5;
+    padding: 1rem;
+    border-radius: 4px;
+    font-family: 'Courier New', monospace;
+    word-break: break-all;
+    margin-top: 0.5rem;
+  }
+</style>

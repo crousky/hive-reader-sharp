@@ -1,0 +1,9 @@
+{
+  "recommendations": [
+    "astro-build.astro-vscode",
+    "ms-dotnettools.csharp",
+    "ms-azuretools.vscode-azurefunctions",
+    "esbenp.prettier-vscode",
+    "dbaeumer.vscode-eslint"
+  ]
+}
