@@ -11,6 +11,37 @@ A complete solution for sending web articles to your Kindle device or app. This 
 - **Google Authentication**: Secure login using Google OAuth
 - **Local Testing Mode**: Test without authentication for development
 
+## 🔑 How It Works with Paywalled Content & VPNs
+
+This extension uses a **browser-side scraping** approach that solves common issues with web clipping tools:
+
+### ✅ Why This Approach Works
+
+**Paywalled Content** - The extension extracts HTML directly from your browser where you're already logged in. If you can read it in your browser, the extension can capture it.
+
+**VPN & Geo-Restrictions** - Content is scraped from the already-loaded page in your browser, not fetched from a server. Your VPN/location settings are preserved.
+
+**JavaScript-Rendered Content** - The extension runs after the page loads, capturing dynamically rendered content (React, Vue, Angular apps, etc.).
+
+**Relative URLs** - All relative image and link URLs are automatically converted to absolute URLs to ensure images display correctly in the EPUB.
+
+**Metadata Extraction** - Automatically extracts article metadata (title, author, description) from Open Graph and Twitter Card meta tags for better EPUB formatting.
+
+### 🔄 The Flow
+
+1. **You browse** to any article (behind paywall, VPN, etc.)
+2. **Extension scrapes** the fully rendered HTML from your browser
+3. **Backend receives** the pre-scraped HTML (no fetching needed)
+4. **Converts to EPUB** with clean formatting
+5. **Sends to Kindle** via email
+
+This means you can save articles from:
+- Medium (member-only stories)
+- New York Times, Wall Street Journal (subscription content)
+- Academic journals (via university access)
+- Company intranets
+- Any site you have access to in your browser
+
 ## 📁 Project Structure
 
 ```
@@ -355,6 +386,13 @@ After making changes to extension files:
 2. Verify the API URLs in `popup.js` are correct
 3. Check browser console for errors
 4. Ensure CORS is configured properly
+
+### Content Not Capturing Correctly
+
+1. **Paywall issues**: Make sure you're logged into the site and can view the content before clicking the extension
+2. **Dynamic content**: Wait for the page to fully load before using the extension
+3. **Images missing**: Extension converts relative URLs to absolute - if images still don't load, the site may use authentication for images
+4. **Incomplete content**: Some sites lazy-load content as you scroll - scroll through the article first, then use the extension
 
 ### Email Not Sending
 
