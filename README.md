@@ -1,4 +1,4 @@
-# 📚 Send to Kindle
+# 📚 Hive Reader
 
 A complete solution for sending web articles to your Kindle device or app. This project includes a browser extension (Chrome/Edge), a web application, and Azure Functions backend for converting web pages to EPUB format and delivering them to your Kindle.
 
@@ -186,7 +186,7 @@ The `local.settings.json` file is already configured for local development with 
     "SMTP_USERNAME": "your-email@gmail.com",
     "SMTP_PASSWORD": "your-app-specific-password",
     "FROM_EMAIL": "your-email@gmail.com",
-    "FROM_NAME": "Send to Kindle"
+    "FROM_NAME": "Hive Reader"
   }
 }
 ```
@@ -258,10 +258,10 @@ This allows you to test the full functionality without setting up Google OAuth d
 The extension includes a "Local Mode" that saves EPUBs to your local machine without requiring authentication:
 
 1. Open any article in your browser
-2. Click the Send to Kindle extension icon
+2. Click the Hive Reader extension icon
 3. Click "Use Local Mode"
 4. Edit the title if needed
-5. Click "Send to Kindle"
+5. Click "Hive Reader"
 6. EPUB will be saved to `functions/SendToKindle/output/`
 
 ### Production Mode (With Authentication)
@@ -269,7 +269,7 @@ The extension includes a "Local Mode" that saves EPUBs to your local machine wit
 1. Sign in to the web app at `http://localhost:4321` (or use test user in dev mode)
 2. Configure your Kindle email in the dashboard
 3. Click the extension icon on any article
-4. Edit the title and click "Send to Kindle"
+4. Edit the title and click "Hive Reader"
 5. Article will be sent to your Kindle email
 
 ## 🔒 Kindle Email Setup
@@ -315,7 +315,7 @@ az functionapp config appsettings set \
     SMTP_USERNAME=your-email@gmail.com \
     SMTP_PASSWORD=your-app-password \
     FROM_EMAIL=your-email@gmail.com \
-    FROM_NAME="Send to Kindle"
+    FROM_NAME="Hive Reader"
 ```
 
 #### Deploy
@@ -361,7 +361,7 @@ Update `extension/popup/popup.js` with your production URLs and reload the exten
 2. **Click the extension icon** in your browser toolbar
 3. **Edit the title** if needed (pre-filled with page title)
 4. **Optionally add an author name**
-5. **Click "Send to Kindle"**
+5. **Click "Hive Reader"**
 6. **Wait for confirmation** - the article will be sent to your Kindle email
 7. **Check your Kindle** - the article should appear within minutes
 

@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "Send to Kindle",
+  "name": "Hive Reader",
   "version": "1.0.0",
-  "description": "Send web pages to your Kindle as EPUB files",
+  "description": "Save web articles to your Kindle - Build your knowledge hive",
   "permissions": [
     "activeTab",
     "scripting",

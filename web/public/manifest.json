@@ -1,0 +1,21 @@
+{
+  "name": "Hive Reader",
+  "short_name": "Hive Reader",
+  "description": "Save articles from the web to your Kindle",
+  "start_url": "/",
+  "display": "standalone",
+  "theme_color": "#FDB813",
+  "background_color": "#C5D5D4",
+  "icons": [
+    {
+      "src": "/favicon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/favicon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
