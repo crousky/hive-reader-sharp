@@ -1,9 +1,11 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import { getCurrentUser } from '../lib/auth';
+import { isLocalEnvironment } from '../lib/test-user';
 
 const user = await getCurrentUser(Astro.cookies);
 const error = Astro.url.searchParams.get('error');
+const isLocal = isLocalEnvironment();
 ---
 
 <Layout title="Send to Kindle - Read Articles on Your Kindle">
@@ -53,7 +55,15 @@ const error = Astro.url.searchParams.get('error');
         {user ? (
           <a href="/dashboard" class="btn btn-primary btn-large">Go to Dashboard</a>
         ) : (
-          <a href="/api/auth/login" class="btn btn-primary btn-large">Get Started Free</a>
+          <>
+            <a href="/api/auth/login" class="btn btn-primary btn-large">Get Started Free</a>
+            {isLocal && (
+              <div class="local-dev-notice">
+                <p>🔧 Local Development Mode</p>
+                <a href="/api/auth/local-login" class="btn btn-secondary">Login as Test User</a>
+              </div>
+            )}
+          </>
         )}
       </div>
     </div>
@@ -123,5 +133,28 @@ const error = Astro.url.searchParams.get('error');
   .btn-large {
     font-size: 1.25rem;
     padding: 1rem 2.5rem;
+  }
+
+  .local-dev-notice {
+    margin-top: 2rem;
+    padding: 1.5rem;
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  }
+
+  .local-dev-notice p {
+    margin-bottom: 1rem;
+    color: #667eea;
+    font-weight: 600;
+  }
+
+  .btn-secondary {
+    background: #48bb78;
+    color: white;
+  }
+
+  .btn-secondary:hover {
+    background: #38a169;
   }
 </style>
