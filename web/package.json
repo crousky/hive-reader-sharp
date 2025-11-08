@@ -1,0 +1,22 @@
+{
+  "name": "send-to-kindle-web",
+  "type": "module",
+  "version": "1.0.0",
+  "scripts": {
+    "dev": "astro dev",
+    "start": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview"
+  },
+  "dependencies": {
+    "astro": "^4.0.0",
+    "@astrojs/node": "^8.0.0",
+    "@azure/cosmos": "^4.0.0",
+    "@auth/core": "^0.18.0",
+    "nanoid": "^5.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.3.0"
+  }
+}

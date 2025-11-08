@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Send to Kindle</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="container">
+    <h1>📚 Send to Kindle</h1>
+
+    <div id="auth-section">
+      <div id="logged-out" class="auth-state">
+        <p class="info-text">Please log in to the Send to Kindle website first.</p>
+        <button id="open-website-btn" class="btn btn-primary">Open Website</button>
+        <div class="divider">OR</div>
+        <p class="info-text small">Use local testing mode (saves to local directory)</p>
+        <button id="use-local-btn" class="btn btn-secondary">Use Local Mode</button>
+      </div>
+
+      <div id="logged-in" class="auth-state hidden">
+        <p class="user-info">Logged in as: <span id="user-email"></span></p>
+      </div>
+    </div>
+
+    <div id="content-section" class="hidden">
+      <div class="form-group">
+        <label for="title-input">Title:</label>
+        <input type="text" id="title-input" class="input" placeholder="Article title">
+      </div>
+
+      <div class="form-group">
+        <label for="author-input">Author (optional):</label>
+        <input type="text" id="author-input" class="input" placeholder="Author name">
+      </div>
+
+      <div id="status-message" class="hidden"></div>
+
+      <button id="send-btn" class="btn btn-primary btn-large">
+        Send to Kindle
+      </button>
+    </div>
+
+    <div id="loading" class="hidden">
+      <div class="spinner"></div>
+      <p>Processing...</p>
+    </div>
+  </div>
+  <script src="popup.js"></script>
+</body>
+</html>

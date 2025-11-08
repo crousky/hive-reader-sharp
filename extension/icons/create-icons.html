@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Generate Icons</title>
+</head>
+<body>
+    <canvas id="canvas16" width="16" height="16"></canvas>
+    <canvas id="canvas48" width="48" height="48"></canvas>
+    <canvas id="canvas128" width="128" height="128"></canvas>
+
+    <script>
+        function createIcon(canvasId, size) {
+            const canvas = document.getElementById(canvasId);
+            const ctx = canvas.getContext('2d');
+
+            // Background
+            ctx.fillStyle = '#FF9900';
+            ctx.fillRect(0, 0, size, size);
+
+            // Book icon outline
+            ctx.strokeStyle = '#FFFFFF';
+            ctx.fillStyle = '#FFFFFF';
+            ctx.lineWidth = Math.max(1, size / 16);
+
+            const padding = size * 0.2;
+            const bookWidth = size - (padding * 2);
+            const bookHeight = size - (padding * 2);
+
+            // Book rectangle
+            ctx.strokeRect(padding, padding, bookWidth, bookHeight);
+
+            // Book spine
+            ctx.beginPath();
+            ctx.moveTo(padding + bookWidth * 0.25, padding);
+            ctx.lineTo(padding + bookWidth * 0.25, padding + bookHeight);
+            ctx.stroke();
+
+            // Download icon
+            const url = canvas.toDataURL('image/png');
+            const link = document.createElement('a');
+            link.download = `icon${size}.png`;
+            link.href = url;
+            link.click();
+        }
+
+        createIcon('canvas16', 16);
+        createIcon('canvas48', 48);
+        createIcon('canvas128', 128);
+    </script>
+</body>
+</html>
