@@ -10,10 +10,15 @@ const { title } = Astro.props;
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="description" content="Send web articles to your Kindle" />
+    <meta name="description" content="Send web articles to your Kindle with Hive Reader" />
     <meta name="viewport" content="width=device-width" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/png" href="/favicon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="192x192" href="/favicon-192x192.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/manifest.json" />
     <meta name="generator" content={Astro.generator} />
+    <meta name="theme-color" content="#FDB813" />
     <title>{title}</title>
     <style is:global>
       * {
@@ -24,7 +29,7 @@ const { title } = Astro.props;
 
       body {
         font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, #C5D5D4 0%, #B8D4D3 50%, #FDB813 100%);
         min-height: 100vh;
         color: #333;
       }
@@ -50,8 +55,11 @@ const { title } = Astro.props;
       nav .logo {
         font-size: 1.5rem;
         font-weight: bold;
-        color: #667eea;
+        color: #FDB813;
         text-decoration: none;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
       }
 
       nav .nav-links {
@@ -67,7 +75,7 @@ const { title } = Astro.props;
       }
 
       nav a:hover {
-        color: #667eea;
+        color: #FDB813;
       }
 
       .btn {
@@ -83,25 +91,26 @@ const { title } = Astro.props;
       }
 
       .btn-primary {
-        background: #667eea;
-        color: white;
+        background: linear-gradient(135deg, #FDB813 0%, #F5A623 100%);
+        color: #333;
+        font-weight: 600;
       }
 
       .btn-primary:hover {
-        background: #5568d3;
+        background: linear-gradient(135deg, #F5A623 0%, #FF9933 100%);
         transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        box-shadow: 0 4px 12px rgba(253, 184, 19, 0.4);
       }
 
       .btn-secondary {
         background: white;
-        color: #667eea;
-        border: 2px solid #667eea;
+        color: #FDB813;
+        border: 2px solid #FDB813;
       }
 
       .btn-secondary:hover {
-        background: #667eea;
-        color: white;
+        background: #FDB813;
+        color: #333;
       }
 
       .card {
@@ -122,7 +131,8 @@ const { title } = Astro.props;
 
       .input:focus {
         outline: none;
-        border-color: #667eea;
+        border-color: #FDB813;
+        box-shadow: 0 0 0 3px rgba(253, 184, 19, 0.1);
       }
 
       .form-group {
@@ -158,7 +168,10 @@ const { title } = Astro.props;
   <body>
     <nav>
       <div class="container">
-        <a href="/" class="logo">📚 Send to Kindle</a>
+        <a href="/" class="logo">
+          <img src="/favicon-32x32.png" alt="Hive Reader" style="width: 32px; height: 32px;" />
+          Hive Reader
+        </a>
         <div class="nav-links">
           <slot name="nav" />
         </div>

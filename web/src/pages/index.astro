@@ -6,7 +6,7 @@ const user = await getCurrentUser(Astro.cookies);
 const error = Astro.url.searchParams.get('error');
 ---
 
-<Layout title="Send to Kindle - Read Articles on Your Kindle">
+<Layout title="Hive Reader - Save Articles to Your Kindle">
   <div slot="nav">
     {user ? (
       <a href="/dashboard" class="btn btn-primary">Dashboard</a>
@@ -24,9 +24,9 @@ const error = Astro.url.searchParams.get('error');
         </div>
       )}
 
-      <h1>📚 Send Web Articles to Your Kindle</h1>
+      <h1>🐝 Collect Knowledge Like a Hive</h1>
       <p class="subtitle">
-        Save articles from anywhere on the web and read them later on your Kindle device or app.
+        Save articles from anywhere on the web to your Kindle. Build your personal knowledge hive, one article at a time.
       </p>
 
       <div class="features">
@@ -108,7 +108,8 @@ const error = Astro.url.searchParams.get('error');
 
   .feature-card h3 {
     margin-bottom: 0.5rem;
-    color: #667eea;
+    color: #FDB813;
+    font-weight: 600;
   }
 
   .feature-card p {
