@@ -2,11 +2,24 @@ import type { AstroCookies } from 'astro';
 import { nanoid } from 'nanoid';
 import type { User, Session } from '../types';
 import { getSessionsContainer, getUsersContainer } from './cosmos';
+import { isLocalEnvironment, getOrCreateTestUser } from './test-user';
 
 const SESSION_COOKIE_NAME = 'session_token';
 const SESSION_DURATION = 24 * 60 * 60 * 1000; // 24 hours
 
 export async function createSession(user: User, cookies: AstroCookies): Promise<void> {
+  if (!user) {
+    throw new Error('Cannot create session: user is undefined or null');
+  }
+
+  if (!user.id) {
+    throw new Error('Cannot create session: user.id is missing');
+  }
+
+  if (!user.email) {
+    throw new Error('Cannot create session: user.email is missing');
+  }
+
   const sessionToken = nanoid(32);
   const expiresAt = Date.now() + SESSION_DURATION;
 
@@ -64,6 +77,19 @@ export async function deleteSession(cookies: AstroCookies): Promise<void> {
 }
 
 export async function getCurrentUser(cookies: AstroCookies): Promise<User | null> {
+  // In local environment, return test user if no session exists
+  if (isLocalEnvironment()) {
+    const session = await getSession(cookies);
+    if (!session) {
+      try {
+        const testUser = await getOrCreateTestUser(getUsersContainer);
+        return testUser;
+      } catch (error) {
+        console.error('Failed to get test user:', error);
+      }
+    }
+  }
+
   const session = await getSession(cookies);
   if (!session) {
     return null;

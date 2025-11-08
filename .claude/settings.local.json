@@ -2,7 +2,9 @@
   "permissions": {
     "allow": [
       "Bash(node generate-icons.js:*)",
-      "Bash(npm install:*)"
+      "Bash(npm install:*)",
+      "WebFetch(domain:code.claude.com)",
+      "Bash(claude mcp add:*)"
     ],
     "deny": [],
     "ask": []

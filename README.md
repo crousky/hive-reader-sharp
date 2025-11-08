@@ -1,4 +1,4 @@
-# 📚 Send to Kindle
+# 📚 Hive Reader
 
 A complete solution for sending web articles to your Kindle device or app. This project includes a browser extension (Chrome/Edge), a web application, and Azure Functions backend for converting web pages to EPUB format and delivering them to your Kindle.
 
@@ -75,6 +75,7 @@ hive-reader-sharp/
 - Node.js 18+ and npm
 - .NET 8.0 SDK
 - Azure Functions Core Tools
+- Azure Cosmos DB Emulator (for local development) - [Download](https://aka.ms/cosmosdb-emulator)
 - Azure account (for deployment)
 - Google Cloud Console account (for OAuth)
 
@@ -124,10 +125,37 @@ NODE_ENV=development
 
 #### Set Up Azure Cosmos DB
 
+**For Local Development (Recommended):**
+
+1. Download and install the [Azure Cosmos DB Emulator](https://aka.ms/cosmosdb-emulator)
+2. Start the emulator
+3. The web app will automatically detect local development mode and use the emulator
+4. No additional configuration needed - emulator credentials are pre-configured
+
+**For Production:**
+
 1. Create a Cosmos DB account in Azure Portal
 2. Choose Core (SQL) API
 3. Copy the endpoint and primary key
 4. Add them to `.env` file
+
+Alternatively, use the included infrastructure templates to deploy Cosmos DB:
+
+```bash
+# Deploy using Azure CLI
+az deployment group create \
+  --resource-group rg-sendtokindle-dev \
+  --template-file infrastructure/main.bicep \
+  --parameters environmentName=dev
+
+# Get connection details
+az deployment group show \
+  --resource-group rg-sendtokindle-dev \
+  --name main \
+  --query properties.outputs
+```
+
+See [infrastructure/README.md](infrastructure/README.md) for detailed deployment instructions.
 
 #### Run the Web App
 
@@ -141,7 +169,7 @@ The app will be available at `http://localhost:4321`
 
 #### Configure Local Settings
 
-Edit `functions/SendToKindle/local.settings.json`:
+The `local.settings.json` file is already configured for local development with Cosmos DB Emulator support. Update the SMTP settings if you want to test email sending:
 
 ```json
 {
@@ -149,16 +177,21 @@ Edit `functions/SendToKindle/local.settings.json`:
   "Values": {
     "AzureWebJobsStorage": "UseDevelopmentStorage=true",
     "FUNCTIONS_WORKER_RUNTIME": "dotnet-isolated",
-    "LOCAL_OUTPUT_DIR": "./output",
+    "AZURE_FUNCTIONS_ENVIRONMENT": "Development",
+    "USE_EMULATOR": "true",
+    "COSMOS_ENDPOINT": "https://localhost:8081",
+    "COSMOS_KEY": "C2y6yDjf5/R+ob0N8A7Cgv30VRDJIWEHLM+4QDU5DE2nQ9nDuVTqobD4b8mGGyPMbIZnqyMsEcaGQy67XIw/Jw==",
     "SMTP_HOST": "smtp.gmail.com",
     "SMTP_PORT": "587",
     "SMTP_USERNAME": "your-email@gmail.com",
     "SMTP_PASSWORD": "your-app-specific-password",
     "FROM_EMAIL": "your-email@gmail.com",
-    "FROM_NAME": "Send to Kindle"
+    "FROM_NAME": "Hive Reader"
   }
 }
 ```
+
+The Cosmos DB Emulator credentials are pre-configured and will be used automatically in development mode.
 
 #### Set Up Email (Gmail)
 
@@ -203,23 +236,40 @@ The extension will automatically detect if you're logged into the web app. For p
 
 ## 🧪 Testing Locally
 
+### Quick Start with Test User
+
+When running in development mode (`NODE_ENV=development`), the app automatically provides a test user:
+
+1. Start the Cosmos DB Emulator
+2. Run the web app: `npm run dev` (in `/web` directory)
+3. Visit `http://localhost:4321`
+4. Click "Login as Test User" button
+5. You'll be automatically logged in without Google OAuth
+
+**Test User Details:**
+- Email: `testuser@example.com`
+- Name: Test User
+- Kindle Email: `testuser@kindle.com`
+
+This allows you to test the full functionality without setting up Google OAuth during development.
+
 ### Local Mode (No Authentication)
 
 The extension includes a "Local Mode" that saves EPUBs to your local machine without requiring authentication:
 
 1. Open any article in your browser
-2. Click the Send to Kindle extension icon
+2. Click the Hive Reader extension icon
 3. Click "Use Local Mode"
 4. Edit the title if needed
-5. Click "Send to Kindle"
+5. Click "Hive Reader"
 6. EPUB will be saved to `functions/SendToKindle/output/`
 
 ### Production Mode (With Authentication)
 
-1. Sign in to the web app at `http://localhost:4321`
+1. Sign in to the web app at `http://localhost:4321` (or use test user in dev mode)
 2. Configure your Kindle email in the dashboard
 3. Click the extension icon on any article
-4. Edit the title and click "Send to Kindle"
+4. Edit the title and click "Hive Reader"
 5. Article will be sent to your Kindle email
 
 ## 🔒 Kindle Email Setup
@@ -265,7 +315,7 @@ az functionapp config appsettings set \
     SMTP_USERNAME=your-email@gmail.com \
     SMTP_PASSWORD=your-app-password \
     FROM_EMAIL=your-email@gmail.com \
-    FROM_NAME="Send to Kindle"
+    FROM_NAME="Hive Reader"
 ```
 
 #### Deploy
@@ -311,7 +361,7 @@ Update `extension/popup/popup.js` with your production URLs and reload the exten
 2. **Click the extension icon** in your browser toolbar
 3. **Edit the title** if needed (pre-filled with page title)
 4. **Optionally add an author name**
-5. **Click "Send to Kindle"**
+5. **Click "Hive Reader"**
 6. **Wait for confirmation** - the article will be sent to your Kindle email
 7. **Check your Kindle** - the article should appear within minutes
 
@@ -367,8 +417,15 @@ After making changes to extension files:
 
 ### Azure Functions API
 
+**EPUB Conversion:**
 - `POST /api/convert-local` - Convert to EPUB and save locally (no auth)
 - `POST /api/convert` - Convert to EPUB and send to Kindle (function key auth)
+
+**User Management:**
+- `GET /api/users/{userId}` - Get user information
+- `POST /api/users` - Create or update user
+- `PATCH /api/users/{userId}/kindle-email` - Update user's Kindle email
+- `DELETE /api/users/{userId}` - Delete user account
 
 ## 🔐 Security
 
@@ -410,6 +467,13 @@ After making changes to extension files:
 
 ### Cosmos DB Connection Issues
 
+**Local Development:**
+1. Ensure Cosmos DB Emulator is running
+2. Check if emulator is accessible at `https://localhost:8081`
+3. Emulator will automatically create database and containers on first use
+4. If SSL errors occur, the app automatically disables SSL verification for the emulator
+
+**Production:**
 1. Verify endpoint and key are correct
 2. Check if database and containers are created
 3. Ensure network access is allowed from your IP
