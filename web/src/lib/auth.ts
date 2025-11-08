@@ -8,6 +8,18 @@ const SESSION_COOKIE_NAME = 'session_token';
 const SESSION_DURATION = 24 * 60 * 60 * 1000; // 24 hours
 
 export async function createSession(user: User, cookies: AstroCookies): Promise<void> {
+  if (!user) {
+    throw new Error('Cannot create session: user is undefined or null');
+  }
+
+  if (!user.id) {
+    throw new Error('Cannot create session: user.id is missing');
+  }
+
+  if (!user.email) {
+    throw new Error('Cannot create session: user.email is missing');
+  }
+
   const sessionToken = nanoid(32);
   const expiresAt = Date.now() + SESSION_DURATION;
 

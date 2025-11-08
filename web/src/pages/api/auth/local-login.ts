@@ -16,6 +16,17 @@ export const GET: APIRoute = async ({ cookies, redirect }) => {
     // Get or create test user
     const testUser = await getOrCreateTestUser(getUsersContainer);
 
+    // Validate that testUser was returned successfully
+    if (!testUser) {
+      console.error('getOrCreateTestUser returned undefined or null');
+      throw new Error('Failed to get or create test user: returned undefined or null');
+    }
+
+    if (!testUser.id) {
+      console.error('Test user missing id property:', testUser);
+      throw new Error('Failed to get or create test user: missing id property');
+    }
+
     // Create session for test user
     await createSession(testUser, cookies);
 
