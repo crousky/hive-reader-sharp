@@ -47,10 +47,52 @@ public class EpubConverter : IEpubConverter
         doc.LoadHtml(html);
 
         // Remove scripts, styles, and other unwanted elements
-        var nodesToRemove = new[] { "script", "style", "nav", "header", "footer", "iframe", "object", "embed" };
+        var nodesToRemove = new[] { "script", "style", "nav", "header", "footer", "iframe", "object", "embed", "form", "button", "svg" };
         foreach (var tag in nodesToRemove)
         {
             var nodes = doc.DocumentNode.SelectNodes($"//{tag}");
+            if (nodes != null)
+            {
+                foreach (var node in nodes.ToList())
+                {
+                    node.Remove();
+                }
+            }
+        }
+
+        // Remove common ad and navigation patterns by class/id/data attributes
+        var unwantedPatterns = new[]
+        {
+            "//*[contains(@class, 'ad-')]",
+            "//*[contains(@class, 'advertisement')]",
+            "//*[contains(@class, 'promo')]",
+            "//*[contains(@class, 'subscribe')]",
+            "//*[contains(@class, 'newsletter')]",
+            "//*[contains(@class, 'social')]",
+            "//*[contains(@class, 'share')]",
+            "//*[contains(@class, 'comment')]",
+            "//*[contains(@class, 'sidebar')]",
+            "//*[contains(@class, 'widget')]",
+            "//*[contains(@class, 'related')]",
+            "//*[contains(@class, 'recommend')]",
+            "//*[contains(@class, 'outbrain')]",
+            "//*[contains(@class, 'taboola')]",
+            "//*[contains(@id, 'sidebar')]",
+            "//*[contains(@id, 'comment')]",
+            "//*[starts-with(@data-testid, 'subscribe')]",
+            "//*[starts-with(@data-testid, 'author-avatar')]",
+            "//*[contains(@data-qa, 'ad')]",
+            "//*[contains(@data-qa, 'subscribe')]",
+            "//*[contains(@data-qa, 'newsletter')]",
+            "//*[contains(@data-qa, 'comments')]",
+            "//*[@role='separator']",
+            "//wp-ad",
+            "//wp-ad-wrapper"
+        };
+
+        foreach (var pattern in unwantedPatterns)
+        {
+            var nodes = doc.DocumentNode.SelectNodes(pattern);
             if (nodes != null)
             {
                 foreach (var node in nodes.ToList())
@@ -69,10 +111,127 @@ public class EpubConverter : IEpubConverter
 
         if (mainContent != null)
         {
-            return mainContent.InnerHtml;
+            // Clean up the main content further
+            CleanNode(mainContent);
+
+            // Extract only paragraph text and headings for cleaner output
+            var cleanedContent = ExtractArticleContent(mainContent);
+            return cleanedContent;
         }
 
         return doc.DocumentNode.InnerHtml;
+    }
+
+    private void CleanNode(HtmlNode node)
+    {
+        // Remove all inline styles
+        var nodesWithStyle = node.SelectNodes(".//*[@style]");
+        if (nodesWithStyle != null)
+        {
+            foreach (var n in nodesWithStyle.ToList())
+            {
+                n.Attributes.Remove("style");
+            }
+        }
+
+        // Remove all class attributes to prevent CSS issues
+        var nodesWithClass = node.SelectNodes(".//*[@class]");
+        if (nodesWithClass != null)
+        {
+            foreach (var n in nodesWithClass.ToList())
+            {
+                n.Attributes.Remove("class");
+            }
+        }
+
+        // Remove all id attributes
+        var nodesWithId = node.SelectNodes(".//*[@id]");
+        if (nodesWithId != null)
+        {
+            foreach (var n in nodesWithId.ToList())
+            {
+                n.Attributes.Remove("id");
+            }
+        }
+
+        // Remove data attributes
+        var allNodes = node.SelectNodes(".//*");
+        if (allNodes != null)
+        {
+            foreach (var n in allNodes)
+            {
+                var attrsToRemove = n.Attributes
+                    .Where(a => a.Name.StartsWith("data-") || a.Name.StartsWith("aria-"))
+                    .ToList();
+
+                foreach (var attr in attrsToRemove)
+                {
+                    n.Attributes.Remove(attr);
+                }
+            }
+        }
+    }
+
+    private string ExtractArticleContent(HtmlNode mainContent)
+    {
+        var result = new StringBuilder();
+
+        // Extract only meaningful content: paragraphs, headings, lists, blockquotes
+        var contentNodes = mainContent.SelectNodes(".//p | .//h1 | .//h2 | .//h3 | .//h4 | .//h5 | .//h6 | .//ul | .//ol | .//blockquote | .//img");
+
+        if (contentNodes != null)
+        {
+            foreach (var node in contentNodes)
+            {
+                // Skip nodes that are inside unwanted containers
+                if (IsInsideUnwantedContainer(node))
+                    continue;
+
+                // Skip empty paragraphs
+                if (node.Name == "p" && string.IsNullOrWhiteSpace(node.InnerText))
+                    continue;
+
+                // For images, only keep if they have proper src
+                if (node.Name == "img")
+                {
+                    var src = node.GetAttributeValue("src", "");
+                    if (string.IsNullOrWhiteSpace(src) || src.Contains("avatar") || src.Contains("icon"))
+                        continue;
+                }
+
+                result.AppendLine(node.OuterHtml);
+            }
+        }
+
+        return result.ToString();
+    }
+
+    private bool IsInsideUnwantedContainer(HtmlNode node)
+    {
+        var current = node.ParentNode;
+        while (current != null)
+        {
+            var className = current.GetAttributeValue("class", "");
+            var dataQa = current.GetAttributeValue("data-qa", "");
+            var dataTestId = current.GetAttributeValue("data-testid", "");
+
+            if (className.Contains("byline") ||
+                className.Contains("author-bio") ||
+                className.Contains("subscribe") ||
+                className.Contains("newsletter") ||
+                className.Contains("promo") ||
+                className.Contains("ad") ||
+                dataQa.Contains("author") ||
+                dataQa.Contains("subscribe") ||
+                dataTestId.Contains("author") ||
+                dataTestId.Contains("subscribe"))
+            {
+                return true;
+            }
+
+            current = current.ParentNode;
+        }
+        return false;
     }
 
     private void CreateMetaInf(ZipArchive archive)
