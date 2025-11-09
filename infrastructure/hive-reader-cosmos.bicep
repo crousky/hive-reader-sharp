@@ -34,7 +34,6 @@ resource cosmosAccount 'Microsoft.DocumentDB/databaseAccounts@2023-04-15' = {
         name: 'EnableServerless'
       }
     ]
-    enableFreeTier: true
     backupPolicy: {
       type: 'Periodic'
       periodicModeProperties: {
