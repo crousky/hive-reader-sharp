@@ -1,9 +1,20 @@
 # PowerShell script to fix federated credentials for GitHub OIDC authentication
 # Run this script to update the federated credentials with the correct repository path
+#
+# Usage:
+#   .\FIX_FEDERATED_CREDENTIALS.ps1 -AppId <your-app-id>
+#   .\FIX_FEDERATED_CREDENTIALS.ps1 -AppId <your-app-id> -GitHubOrg <org> -GitHubRepo <repo>
 
-$AppId = "78227685-c5f3-4693-a0fa-2e8d0a711b12"
-$GitHubOrg = "crousky"
-$GitHubRepo = "hive-reader-sharp"
+param(
+    [Parameter(Mandatory=$true, HelpMessage="Azure AD App ID (Client ID)")]
+    [string]$AppId,
+
+    [Parameter(Mandatory=$false, HelpMessage="GitHub organization name")]
+    [string]$GitHubOrg = "crousky",
+
+    [Parameter(Mandatory=$false, HelpMessage="GitHub repository name")]
+    [string]$GitHubRepo = "hive-reader-sharp"
+)
 
 Write-Host "Fixing federated credentials for GitHub OIDC authentication..." -ForegroundColor Cyan
 
@@ -30,29 +41,22 @@ if ($LASTEXITCODE -eq 0) {
     Write-Host "  [INFO] GitHubMainBranch credential not found (this is okay)" -ForegroundColor Gray
 }
 
-# Create temporary JSON files for credentials
-$mainBranchJson = @"
-{
-  "name": "GitHubMainBranch",
-  "issuer": "https://token.actions.githubusercontent.com",
-  "subject": "repo:$GitHubOrg/$GitHubRepo:ref:refs/heads/main",
-  "audiences": ["api://AzureADTokenExchange"]
-}
-"@
-
-$pullRequestJson = @"
-{
-  "name": "GitHubPullRequests",
-  "issuer": "https://token.actions.githubusercontent.com",
-  "subject": "repo:$GitHubOrg/$GitHubRepo:pull_request",
-  "audiences": ["api://AzureADTokenExchange"]
-}
-"@
-
 # Create the correct federated credential for main branch
 Write-Host "`nCreating federated credential for main branch..." -ForegroundColor Yellow
-$mainBranchFile = [System.IO.Path]::GetTempFileName() + ".json"
-$mainBranchJson | Out-File -FilePath $mainBranchFile -Encoding utf8
+
+# Create JSON object with proper string interpolation
+$mainBranchSubject = "repo:${GitHubOrg}/${GitHubRepo}:ref:refs/heads/main"
+$mainBranchJson = @{
+    name = "GitHubMainBranch"
+    issuer = "https://token.actions.githubusercontent.com"
+    subject = $mainBranchSubject
+    audiences = @("api://AzureADTokenExchange")
+} | ConvertTo-Json -Compress
+
+Write-Host "  Debug - Main branch subject: $mainBranchSubject" -ForegroundColor Gray
+
+$mainBranchFile = [System.IO.Path]::GetTempFileName()
+[System.IO.File]::WriteAllText($mainBranchFile, $mainBranchJson, [System.Text.Encoding]::UTF8)
 
 az ad app federated-credential create --id $AppId --parameters "@$mainBranchFile"
 
@@ -68,8 +72,20 @@ Remove-Item -Path $mainBranchFile -ErrorAction SilentlyContinue
 
 # Create the correct federated credential for pull requests
 Write-Host "`nCreating federated credential for pull requests..." -ForegroundColor Yellow
-$pullRequestFile = [System.IO.Path]::GetTempFileName() + ".json"
-$pullRequestJson | Out-File -FilePath $pullRequestFile -Encoding utf8
+
+# Create JSON object with proper string interpolation
+$pullRequestSubject = "repo:${GitHubOrg}/${GitHubRepo}:pull_request"
+$pullRequestJson = @{
+    name = "GitHubPullRequests"
+    issuer = "https://token.actions.githubusercontent.com"
+    subject = $pullRequestSubject
+    audiences = @("api://AzureADTokenExchange")
+} | ConvertTo-Json -Compress
+
+Write-Host "  Debug - Pull request subject: $pullRequestSubject" -ForegroundColor Gray
+
+$pullRequestFile = [System.IO.Path]::GetTempFileName()
+[System.IO.File]::WriteAllText($pullRequestFile, $pullRequestJson, [System.Text.Encoding]::UTF8)
 
 az ad app federated-credential create --id $AppId --parameters "@$pullRequestFile"
 

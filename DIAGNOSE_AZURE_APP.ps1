@@ -1,5 +1,14 @@
 # Diagnostic script to check Azure AD App and fix federated credentials
-$AppId = "78227685-c5f3-4693-a0fa-2e8d0a711b12"
+# PowerShell script to diagnose the current state of the Azure AD App and federated credentials
+# This will help us understand why the OIDC authentication is still failing
+#
+# Usage:
+#   .\DIAGNOSE_AZURE_APP.ps1 -AppId <your-app-id>
+
+param(
+    [Parameter(Mandatory=$true, HelpMessage="Azure AD App ID (Client ID)")]
+    [string]$AppId
+)
 
 Write-Host "=== Azure AD App Diagnostics ===" -ForegroundColor Cyan
 Write-Host ""

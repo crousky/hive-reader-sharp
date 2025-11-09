@@ -19,8 +19,8 @@ See [DEPLOYMENT_SAFETY.md](DEPLOYMENT_SAFETY.md) for complete details.
 4. **[DEPLOYMENT_SAFETY.md](DEPLOYMENT_SAFETY.md)** - Comprehensive safety documentation
 5. **[SETUP_NEW_AZURE_APP.ps1](SETUP_NEW_AZURE_APP.ps1)** - PowerShell script to create Azure AD App
 6. **[PRE_FLIGHT_CHECK.ps1](PRE_FLIGHT_CHECK.ps1)** - Pre-flight check script
-7. **[FIX_FEDERATED_CREDENTIALS.ps1](FIX_FEDERATED_CREDENTIALS.ps1)** - PowerShell script to fix OIDC credentials
-8. **[DIAGNOSE_AZURE_APP.ps1](DIAGNOSE_AZURE_APP.ps1)** - PowerShell diagnostic script
+7. **[FIX_FEDERATED_CREDENTIALS.ps1](FIX_FEDERATED_CREDENTIALS.ps1)** - PowerShell script to fix OIDC credentials (requires App ID parameter)
+8. **[DIAGNOSE_AZURE_APP.ps1](DIAGNOSE_AZURE_APP.ps1)** - PowerShell diagnostic script (requires App ID parameter)
 
 ### Files Modified
 
