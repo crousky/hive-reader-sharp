@@ -5,7 +5,7 @@ param cosmosAccountName string
 param location string = resourceGroup().location
 
 @description('The database name')
-param databaseName string = 'SendToKindleDB'
+param databaseName string = 'HiveReaderDB'
 
 @description('The users container name')
 param usersContainerName string = 'Users'

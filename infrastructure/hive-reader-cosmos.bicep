@@ -125,4 +125,5 @@ output cosmosAccountName string = cosmosAccount.name
 output databaseName string = database.name
 
 @description('The Cosmos DB connection string')
+@secure()
 output cosmosConnectionString string = cosmosAccount.listConnectionStrings().connectionStrings[0].connectionString

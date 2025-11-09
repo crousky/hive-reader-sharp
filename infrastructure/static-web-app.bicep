@@ -39,4 +39,5 @@ output staticWebAppDefaultHostname string = staticWebApp.properties.defaultHostn
 output staticWebAppName string = staticWebApp.name
 
 @description('The deployment token for GitHub Actions')
+@secure()
 output deploymentToken string = staticWebApp.listSecrets().properties.apiKey

@@ -31,7 +31,7 @@ module staticWebApp 'static-web-app.bicep' = {
 module cosmos 'cosmos.bicep' = {
   name: 'cosmosDeployment'
   params: {
-    cosmosAccountName: 'sendtokindle-${environmentName}-${nameSuffix}'
+    cosmosAccountName: 'hive-reader-legacy-${environmentName}-${nameSuffix}'
     location: location
   }
 }
