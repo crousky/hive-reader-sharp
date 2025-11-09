@@ -27,15 +27,6 @@ module staticWebApp 'static-web-app.bicep' = {
   }
 }
 
-// Legacy Cosmos DB (kept for backward compatibility)
-module cosmos 'cosmos.bicep' = {
-  name: 'cosmosDeployment'
-  params: {
-    cosmosAccountName: 'hive-reader-legacy-${environmentName}-${nameSuffix}'
-    location: location
-  }
-}
-
 // Outputs for Hive Reader
 output hiveReaderCosmosEndpoint string = hiveReaderCosmos.outputs.cosmosEndpoint
 output hiveReaderCosmosAccountName string = hiveReaderCosmos.outputs.cosmosAccountName
@@ -47,8 +38,3 @@ output staticWebAppId string = staticWebApp.outputs.staticWebAppId
 output staticWebAppUrl string = 'https://${staticWebApp.outputs.staticWebAppDefaultHostname}'
 output staticWebAppName string = staticWebApp.outputs.staticWebAppName
 output staticWebAppDeploymentToken string = staticWebApp.outputs.deploymentToken
-
-// Legacy Outputs (kept for backward compatibility)
-output cosmosEndpoint string = cosmos.outputs.cosmosEndpoint
-output cosmosAccountName string = cosmos.outputs.cosmosAccountName
-output databaseName string = cosmos.outputs.databaseName
