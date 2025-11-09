@@ -7,11 +7,11 @@ param location string = resourceGroup().location
 @description('The database name')
 param databaseName string = 'HiveReaderDB'
 
-@description('The users container name')
-param usersContainerName string = 'Users'
+@description('The articles container name')
+param articlesContainerName string = 'Articles'
 
-@description('The sessions container name')
-param sessionsContainerName string = 'Sessions'
+@description('The user preferences container name')
+param userPreferencesContainerName string = 'UserPreferences'
 
 resource cosmosAccount 'Microsoft.DocumentDB/databaseAccounts@2023-04-15' = {
   name: cosmosAccountName
@@ -55,15 +55,15 @@ resource database 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases@2023-04-15
   }
 }
 
-resource usersContainer 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers@2023-04-15' = {
+resource articlesContainer 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers@2023-04-15' = {
   parent: database
-  name: usersContainerName
+  name: articlesContainerName
   properties: {
     resource: {
-      id: usersContainerName
+      id: articlesContainerName
       partitionKey: {
         paths: [
-          '/id'
+          '/userId'
         ]
         kind: 'Hash'
       }
@@ -85,19 +85,18 @@ resource usersContainer 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/cont
   }
 }
 
-resource sessionsContainer 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers@2023-04-15' = {
+resource userPreferencesContainer 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers@2023-04-15' = {
   parent: database
-  name: sessionsContainerName
+  name: userPreferencesContainerName
   properties: {
     resource: {
-      id: sessionsContainerName
+      id: userPreferencesContainerName
       partitionKey: {
         paths: [
-          '/userId'
+          '/id'
         ]
         kind: 'Hash'
       }
-      defaultTtl: 86400 // 24 hours - automatically delete expired sessions
       indexingPolicy: {
         indexingMode: 'consistent'
         automatic: true
@@ -124,3 +123,7 @@ output cosmosAccountName string = cosmosAccount.name
 
 @description('The database name')
 output databaseName string = database.name
+
+@description('The Cosmos DB connection string')
+@secure()
+output cosmosConnectionString string = cosmosAccount.listConnectionStrings().connectionStrings[0].connectionString

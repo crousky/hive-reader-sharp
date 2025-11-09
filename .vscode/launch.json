@@ -9,20 +9,11 @@
       "preLaunchTask": "func: host start"
     },
     {
-      "name": "Attach to .NET Functions",
-      "type": "coreclr",
-      "request": "attach",
-      "processId": "${command:azureFunctions.pickProcess}"
-    },
-    {
       "name": "Run Web (Astro)",
       "type": "node",
       "request": "launch",
       "runtimeExecutable": "npm",
-      "runtimeArgs": [
-        "run",
-        "dev"
-      ],
+      "runtimeArgs": ["run", "dev"],
       "cwd": "${workspaceFolder}/web",
       "console": "integratedTerminal",
       "internalConsoleOptions": "neverOpen",
@@ -31,6 +22,12 @@
         "uriFormat": "http://localhost:%s",
         "action": "openExternally"
       }
+    },
+    {
+      "name": "Attach to .NET Functions",
+      "type": "coreclr",
+      "request": "attach",
+      "processId": "${command:azureFunctions.pickProcess}"
     }
   ]
 }
