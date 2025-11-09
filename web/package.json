@@ -1,5 +1,5 @@
 {
-  "name": "send-to-kindle-web",
+  "name": "hive-reader-web",
   "type": "module",
   "version": "1.0.0",
   "scripts": {
@@ -9,10 +9,9 @@
     "preview": "astro preview"
   },
   "dependencies": {
-    "astro": "^4.0.0",
-    "@astrojs/node": "^8.0.0",
-    "@azure/cosmos": "^4.0.0",
     "@auth/core": "^0.18.0",
+    "@azure/cosmos": "^4.0.0",
+    "astro": "^4.0.0",
     "nanoid": "^5.0.0"
   },
   "devDependencies": {
