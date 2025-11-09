@@ -2,11 +2,21 @@
 
 This guide walks you through deploying the Hive Reader application to Azure using Infrastructure as Code (Bicep) and GitHub Actions with OIDC authentication.
 
+## Safety First
+
+⚠️ **All deployments are NON-DESTRUCTIVE** - See [DEPLOYMENT_SAFETY.md](DEPLOYMENT_SAFETY.md) for details.
+
+- ✅ Never deletes existing resources
+- ✅ Preserves all data in databases
+- ✅ Uses existing resource group `rg-green-squirrel`
+- ✅ Only creates or updates resources
+
 ## Prerequisites
 
 - Azure CLI installed ([Installation Guide](https://learn.microsoft.com/en-us/cli/azure/install-azure-cli))
 - Azure subscription with appropriate permissions
 - GitHub repository with admin access
+- Existing resource group: `rg-green-squirrel` in `eastus2`
 
 ## Architecture
 
@@ -23,7 +33,15 @@ az login
 az account set --subscription "<YOUR_SUBSCRIPTION_ID>"
 ```
 
-## Step 2: Create Resource Group (if not exists)
+## Step 2: Verify Resource Group Exists
+
+Your resource group `rg-green-squirrel` should already exist in `eastus2`. Verify it:
+
+```bash
+az group show --name rg-green-squirrel
+```
+
+If it doesn't exist, create it:
 
 ```bash
 az group create \
@@ -31,20 +49,26 @@ az group create \
   --location eastus2
 ```
 
-> **Note:** All resources are deployed to `eastus2` region.
+## Step 3: Deploy Infrastructure (Non-Destructive)
 
-## Step 3: Deploy Infrastructure
-
-Deploy the Bicep template to create all Azure resources:
+Deploy the Bicep template to create all Azure resources. This deployment is **non-destructive**:
+- Creates new resources that don't exist
+- Updates existing resources to match the template (preserves data)
+- Never deletes existing resources
 
 ```bash
 az deployment group create \
   --resource-group rg-green-squirrel \
   --template-file infrastructure/main.bicep \
-  --parameters environmentName=prod
+  --parameters environmentName=prod \
+  --mode Incremental
 ```
 
-> **Note:** The location parameter is optional and defaults to the resource group location (`eastus2`).
+> **Safety Notes:**
+> - The deployment uses `Incremental` mode (default) - never deletes existing resources
+> - Cosmos DB deployments preserve all existing data
+> - Static Web App deployments preserve all existing configurations
+> - The location parameter defaults to the resource group location (`eastus2`)
 
 This will create:
 
@@ -123,17 +147,13 @@ az role assignment create \
 This allows GitHub Actions to authenticate without secrets:
 
 ```bash
-# Get your GitHub username/org and repo name
-GITHUB_ORG="your-github-username-or-org"
-GITHUB_REPO="hive-reader-sharp"
-
 # Create federated credential for main branch
 az ad app federated-credential create \
   --id 78227685-c5f3-4693-a0fa-2e8d0a711b12 \
   --parameters '{
     "name": "GitHubMainBranch",
     "issuer": "https://token.actions.githubusercontent.com",
-    "subject": "repo:'"$GITHUB_ORG"'/'"$GITHUB_REPO"':ref:refs/heads/main",
+    "subject": "repo:crousky/hive-reader-sharp:ref:refs/heads/main",
     "audiences": ["api://AzureADTokenExchange"]
   }'
 
@@ -143,7 +163,7 @@ az ad app federated-credential create \
   --parameters '{
     "name": "GitHubPullRequests",
     "issuer": "https://token.actions.githubusercontent.com",
-    "subject": "repo:'"$GITHUB_ORG"'/'"$GITHUB_REPO"':pull_request",
+    "subject": "repo:crousky/hive-reader-sharp:pull_request",
     "audiences": ["api://AzureADTokenExchange"]
   }'
 ```

@@ -68,15 +68,80 @@
       }
     },
     {
-      "type": "func",
-      "label": "func: host start",
-      "command": "host start",
-      "problemMatcher": "$func-dotnet-watch",
-      "isBackground": true,
-      "dependsOn": "build",
+      "label": "clean (functions)",
+      "command": "dotnet",
+      "args": [
+        "clean",
+        "/property:GenerateFullPaths=true",
+        "/consoleloggerparameters:NoSummary"
+      ],
+      "type": "process",
+      "problemMatcher": "$msCompile",
       "options": {
-        "cwd": "${workspaceFolder}/functions/SendToKindle"
+        "cwd": "${workspaceFolder}/functions\\SendToKindle"
       }
+    },
+    {
+      "label": "build (functions)",
+      "command": "dotnet",
+      "args": [
+        "build",
+        "/property:GenerateFullPaths=true",
+        "/consoleloggerparameters:NoSummary"
+      ],
+      "type": "process",
+      "dependsOn": "clean (functions)",
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "problemMatcher": "$msCompile",
+      "options": {
+        "cwd": "${workspaceFolder}/functions\\SendToKindle"
+      }
+    },
+    {
+      "label": "clean release (functions)",
+      "command": "dotnet",
+      "args": [
+        "clean",
+        "--configuration",
+        "Release",
+        "/property:GenerateFullPaths=true",
+        "/consoleloggerparameters:NoSummary"
+      ],
+      "type": "process",
+      "problemMatcher": "$msCompile",
+      "options": {
+        "cwd": "${workspaceFolder}/functions\\SendToKindle"
+      }
+    },
+    {
+      "label": "publish (functions)",
+      "command": "dotnet",
+      "args": [
+        "publish",
+        "--configuration",
+        "Release",
+        "/property:GenerateFullPaths=true",
+        "/consoleloggerparameters:NoSummary"
+      ],
+      "type": "process",
+      "dependsOn": "clean release (functions)",
+      "problemMatcher": "$msCompile",
+      "options": {
+        "cwd": "${workspaceFolder}/functions\\SendToKindle"
+      }
+    },
+    {
+      "type": "func",
+      "dependsOn": "build (functions)",
+      "options": {
+        "cwd": "${workspaceFolder}/functions\\SendToKindle/bin/Debug/net8.0"
+      },
+      "command": "host start",
+      "isBackground": true,
+      "problemMatcher": "$func-dotnet-watch"
     }
   ]
 }

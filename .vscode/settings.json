@@ -25,5 +25,11 @@
     "**/obj": true,
     "**/dist": true,
     "**/.vs": true
-  }
+  },
+  "azureFunctions.projectSubpath": "functions\\SendToKindle",
+  "azureFunctions.deploySubpath": "functions\\SendToKindle/bin/Release/net8.0/publish",
+  "azureFunctions.projectLanguage": "C#",
+  "azureFunctions.projectRuntime": "~4",
+  "debug.internalConsoleOptions": "neverOpen",
+  "azureFunctions.preDeployTask": "publish (functions)"
 }

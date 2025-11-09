@@ -1,5 +1,14 @@
 # Quick Deployment Summary
 
+## Safety Notice
+
+⚠️ **All deployments are NON-DESTRUCTIVE**
+- Never deletes existing resources
+- Preserves all database data
+- Uses existing resource group `rg-green-squirrel`
+
+See [DEPLOYMENT_SAFETY.md](DEPLOYMENT_SAFETY.md) for complete details.
+
 ## What Changed
 
 ### New Files Created
@@ -7,6 +16,11 @@
 1. **[infrastructure/static-web-app.bicep](infrastructure/static-web-app.bicep)** - Azure Static Web App resource definition
 2. **[infrastructure/hive-reader-cosmos.bicep](infrastructure/hive-reader-cosmos.bicep)** - New Cosmos DB for Hive Reader
 3. **[AZURE_DEPLOYMENT.md](AZURE_DEPLOYMENT.md)** - Complete deployment guide
+4. **[DEPLOYMENT_SAFETY.md](DEPLOYMENT_SAFETY.md)** - Comprehensive safety documentation
+5. **[SETUP_NEW_AZURE_APP.ps1](SETUP_NEW_AZURE_APP.ps1)** - PowerShell script to create Azure AD App
+6. **[PRE_FLIGHT_CHECK.ps1](PRE_FLIGHT_CHECK.ps1)** - Pre-flight check script
+7. **[FIX_FEDERATED_CREDENTIALS.ps1](FIX_FEDERATED_CREDENTIALS.ps1)** - PowerShell script to fix OIDC credentials
+8. **[DIAGNOSE_AZURE_APP.ps1](DIAGNOSE_AZURE_APP.ps1)** - PowerShell diagnostic script
 
 ### Files Modified
 
@@ -15,18 +29,46 @@
 
 ## Quick Start Deployment
 
-### 1. Deploy Infrastructure (5 minutes)
+### 1. Set up Azure AD App & GitHub Secrets (5 minutes)
 
-```bash
-az login
-az group create --name rg-green-squirrel --location eastus2
-az deployment group create \
-  --resource-group rg-green-squirrel \
-  --template-file infrastructure/main.bicep \
-  --parameters environmentName=prod
+Run the setup script:
+
+```powershell
+.\SETUP_NEW_AZURE_APP.ps1
 ```
 
-### 2. Set up GitHub OIDC (10 minutes)
+This will:
+- Create Azure AD App `GH-HiveReader-Deploy`
+- Set up OIDC federated credentials
+- Configure GitHub secrets automatically
+
+### 2. Verify Everything is Ready (1 minute)
+
+```powershell
+.\PRE_FLIGHT_CHECK.ps1
+```
+
+This checks:
+- ✅ Azure CLI installed and logged in
+- ✅ Resource group exists
+- ✅ GitHub secrets are configured
+- ✅ All templates are present
+
+### 3. Push to GitHub (Automatic Deployment!)
+
+```bash
+git add .
+git commit -m "Configure Azure deployment"
+git push origin main
+```
+
+**The GitHub Action will automatically:**
+1. Deploy infrastructure (creates resources if they don't exist)
+2. Build and deploy your web application
+
+> **Note:** Infrastructure deployment is automatic and non-destructive - creates new resources, updates existing ones, never deletes.
+
+### Alternative: Manual Infrastructure Deployment
 
 ```bash
 # Create Azure AD App
@@ -43,21 +85,18 @@ az role assignment create \
   --role Contributor \
   --scope /subscriptions/$SUBSCRIPTION_ID/resourceGroups/rg-green-squirrel
 
-# Set up Federated Credentials (replace GITHUB_ORG and GITHUB_REPO)
-GITHUB_ORG="your-org"
-GITHUB_REPO="hive-reader-sharp"
-
+# Set up Federated Credentials
 az ad app federated-credential create --id 78227685-c5f3-4693-a0fa-2e8d0a711b12 --parameters '{
   "name": "GitHubMainBranch",
   "issuer": "https://token.actions.githubusercontent.com",
-  "subject": "repo:'"$GITHUB_ORG"'/'"$GITHUB_REPO"':ref:refs/heads/main",
+  "subject": "repo:crousky/hive-reader-sharp:ref:refs/heads/main",
   "audiences": ["api://AzureADTokenExchange"]
 }'
 
 az ad app federated-credential create --id 78227685-c5f3-4693-a0fa-2e8d0a711b12 --parameters '{
   "name": "GitHubPullRequests",
   "issuer": "https://token.actions.githubusercontent.com",
-  "subject": "repo:'"$GITHUB_ORG"'/'"$GITHUB_REPO"':pull_request",
+  "subject": "repo:crousky/hive-reader-sharp:pull_request",
   "audiences": ["api://AzureADTokenExchange"]
 }'
 ```
